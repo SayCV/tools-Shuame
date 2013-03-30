@@ -1,0 +1,46 @@
+# list 2nd files per device
+# format:
+#	Name <AsicId.OmapId> <AsicId.Version> <HS|GP> 2nd-file additional <additional-commandline-parameters>
+
+ZOOM2_MDDR_MICRON_2G 343007 57 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_2g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_zoom2_micron_2g.txt
+
+EVM_MDDR_HYNIX_2G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_2g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm37xx_hynix_2g.txt
+EVM_MDDR_HYNIX_2G 363007 07 HS Targets\2nd-Downloaders\dnld_startup_omap3_hs_2g.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm37xx_hynix_2g.txt
+SDP_MDDR_HYNIX_4G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_sdp3630_hynix_4g.txt
+SDP_MDDR_HYNIX_4G 363007 07 HS Targets\2nd-Downloaders\dnld_startup_omap3_hs_4g.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_sdp3630_hynix_4g.txt
+SDP_MDDR_HYNIX_8G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_sdp3630_hynix_8g.txt
+SDP_MDDR_HYNIX_8G 363007 07 HS Targets\2nd-Downloaders\dnld_startup_omap3_hs_4g.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_sdp3630_hynix_8g.txt
+ZOOM3_MDDR_HYNIX_4G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_zoom3_hynix_4g.txt
+ZOOM3_MDDR_HYNIX_4G 363007 07 HS Targets\2nd-Downloaders\dnld_startup_omap3_hs_4g.signed.2nd -pheriphalboot_reopen  -board_config Targets\Configurations\configuration_zoom3_hynix_4g.txt
+ZOOM3_MDDR_HYNIX_8G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_8g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_zoom3_hynix_8g.txt
+ZOOM3_MDDR_HYNIX_8G 363007 07 HS Targets\2nd-Downloaders\dnld_startup_omap3_hs_8g.signed.2nd -pheriphalboot_reopen  -board_config Targets\Configurations\configuration_zoom3_hynix_8g.txt
+
+# OMAP4 virtio simulation software
+SDP_ROMAPI_DEBUG 44300F 01 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430_elpida_4g.txt
+
+# OMAP4 real hardware
+SEVM_MDDR_ELPIDA_4G 443007 01 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es1.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 01 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es1.s1.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es1.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 02 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 02 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s1.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 03 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 03 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 04 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_4G 443007 04 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430es2.0_elpida_4g.txt
+#SEVM_MDDR_ELPIDA_4G 444007 01 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4460es1.0_elpida_4g.txt
+#SEVM_MDDR_ELPIDA_4G 444007 01 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4460es1.0_elpida_4g.txt
+SEVM_MDDR_ELPIDA_8G 444007 01 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_8g.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4460es1.0_elpida_8g.txt
+SEVM_MDDR_ELPIDA_8G 444007 01 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_8g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4460es1.0_elpida_8g.txt
+
+# Legacy - to keep compatibility with scripts in existence 
+SDP_ROMAPI_DEBUG 443007 01 GP Targets\2nd-Downloaders\dnld_startup_omap4_gp_4g_es1.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430_elpida_4g.txt
+SDP_ROMAPI_DEBUG 443007 01 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es1.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_evm4430_elpida_4g.txt
+
+# OMAP-SAMSUNG H/W
+OMAP4430_TUNA_8G_EMU 443007 03 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4430_tuna_8g.txt
+OMAP4430_TUNA_8G_HS 443007 03 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd.hs -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4430_tuna_8g.txt
+OMAP4430_TUNA_8G_EMU 443007 04 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4430_tuna_8g.txt
+OMAP4430_TUNA_8G_HS 443007 04 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_4g_es2.s2.signed.2nd.hs -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4430_tuna_8g.txt
+OMAP4460_TUNA_8G_EMU 444007 01 HS Targets\2nd-Downloaders\dnld_startup_omap4_hs_8g_es2.s2.signed.2nd -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4460_tuna_8g.txt
+OMAP4460_TUNA_8G_HS_ENG 444007 01 HS Targets/2nd-Downloaders/dnld_startup_omap4_hs_8g_es2.s2.signed.2nd.hs_eng -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4460_tuna_8g.txt
+OMAP4460_TUNA_8G_HS_PRO 444007 01 HS Targets/2nd-Downloaders/dnld_startup_omap4_hs_8g_es2.s2.signed.2nd.hs_pro -pheriphalboot_reopen -board_config Targets\Configurations\configuration_omap4460_tuna_8g.txt

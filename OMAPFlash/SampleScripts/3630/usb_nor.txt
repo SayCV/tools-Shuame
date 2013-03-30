@@ -1,0 +1,21 @@
+# OMAP3
+-omap 3
+# Timeout and other config
+-t 600 -p SDP_MDDR_HYNIX_4G -2 
+
+# Erase one block starting at offset 0
+chip_erase SIBLEY0 40000
+# Erase one block starting at an offset of one block
+chip_erase SIBLEY0@40000 40000
+# Erase the entire device
+chip_erase SIBLEY0 0
+# Erase to the end of the decvice starting at an offset of one block
+chip_erase SIBLEY0@40000 0
+
+# Download binary to start of device
+chip_download SIBLEY0 .\test_data\pattern_1K.bin
+# Download binary to device starting af offset 40000h
+chip_download SIBLEY0@40000 .\test_data\pattern_1K.bin
+
+# Upload
+chip_upload SIBLEY0 400 c:.\temp\upload.bin

@@ -1,0 +1,6 @@
+##kozio
+-omap 4
+-t 36000 -p SDP_ROMAPI_DEBUG -2 
+
+chip_upload EMMC@00000 8414 c:\temp\emmc\kdiags.sdp4430.mmc.boot.bin
+chip_upload EMMC@10000 11ee2c c:\temp\emmc\kdiags.sdp4430.mmc.main.bin

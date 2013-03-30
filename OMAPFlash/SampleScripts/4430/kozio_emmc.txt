@@ -1,0 +1,7 @@
+##kozio
+-omap 4
+-t 36000 -p SEVM_MDDR_ELPIDA -2 
+
+chip_download EMMC@00000 kozio\kDiagnostics\kdiags.sdp4430.mmc.boot.bin
+chip_download EMMC@10000 kozio\kDiagnostics\kdiags.sdp4430.mmc.main.bin
+command reset

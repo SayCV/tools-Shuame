@@ -1,0 +1,26 @@
+# UART on COM1
+-com 1
+# Slow down effective transfer rate to a speed the boot rom code can cope with
+-boot_package_delay 500 -max_boot_package_size 1024 
+# OMAP4
+-omap 4
+# Timeout and other config
+-t 600 -p SEVM_MDDR_ELPIDA_4G -2 
+
+# eMMC chips support write without prior erase but you can still do an explict erase
+# Erase one group starting at offset 0
+chip_erase EMMC 80000
+# Erase one group starting at an offset of one group
+chip_erase EMMC@80000 80000
+# Erase the entire device
+chip_erase EMMC 0
+# Erase to the end of the decvice starting at an offset of one group
+chip_erase EMMC@80000 0
+
+# Download binary to start of device
+chip_download EMMC .\test_data\pattern_1K.bin
+# Download binary to device starting af offset 80000h
+chip_download EMMC@80000 .\test_data\pattern_1K.bin
+
+# Upload
+chip_upload EMMC 400 c:.\temp\upload.bin

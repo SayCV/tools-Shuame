@@ -1,0 +1,11 @@
+Quick user guide
+
+This purpose of this software is to allow you to transfer a binary image to a memory device supported by your platform. In 
+order to download software to a platform:
+
+1) Connect the platform to your PC using a serial cable (UART or USB).
+2) Ensure that the CS0 device configured on the plaform is the default configuration on S8 (0000)
+3) Ensure that the platform is configured to do peripheral boot using the system boot mode on S9
+4) Create a script file (samples can be found on '.\Sample Scripts') for the memory and file to download
+5) Run 'omapflash @<scriptfile>'
+6) Reset the platform
