@@ -1,0 +1,194 @@
+# Specify platform memories
+
+memory SIBLEY0 driver Targets\Flash-Drivers\nor_intel_sibley_drv.bin parameters address 0x10000000
+# Do not set bberase to 1 unless you know what you are doing - it will cause factory-marked bad blocks to be marked as good and cannot be undone
+memory NAND     driver Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin parameters gpmc 0x6E000000 cs 1 address 0x28000000 bberase 0
+# memory NANDIFNO driver Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin parameters gpmc 0x6E000000 cs 1 address 0x28000000 bberase 0 onfi 0 bpp 2048 sbpp 64 ppb 64 bpl 4096 l 1 acv 0x23 f 0x0019
+# Do not set bberase to 1 unless you know what you are doing - it will cause factory-marked bad blocks to be marked as good and cannot be undone
+memory ONENAND driver Targets\Flash-Drivers\onenand_drv.bin parameters address 0x20000000 bberase 0
+memory ONENAND2 driver Targets\Flash-Drivers\onenand_drv.bin parameters address 0x20000000 bberase 0 w 16 b 2048 ppb 64 spp 4 ssize 512
+memory SDRAM   parameters address 0x80000000
+
+# Get device definitions
+
+use .\targets\definitions\definitions_omap3.txt
+
+# Specify OMAP configuration
+
+RPAPI_BASE    0x00014200
+
+MODE_32
+
+# PRCM Configuration - OMAP3630 @ 166
+
+WRITE         PRM_CLKSRC_CTRL      0x00000040
+WRITE         PRM_CLKSEL           SYS_CLKIN_SEL_26
+MODIFY        CM_CLKEN_PLL         EN_CORE_DPLL_MODE_MASK             0x00000005
+POLL_ZERO     CM_IDLEST_CKGEN      CM_IDLEST_CKGEN_ST_CORE_CLK_MASK
+MODIFY        CM_CLKEN_PLL_MPU     EN_XXX_DPLL_MODE_MASK              EN_XXX_DPLL_LO_PWR_BYPASS
+POLL_ZERO     CM_IDLEST_PLL_MPU    CM_IDLEST_PLL_MPU_ST_MPU_CLK_MASK
+MODIFY        CM_CLKEN_PLL         EN_PERIPH_DPLL_MODE_MASK           EN_PERIPH_DPLL_LO_PWR_STOP
+POLL_ZERO     CM_IDLEST_CKGEN      ST_PERIPH_CLK_DPLL4_LOCKED
+MODIFY        CM_CLKSEL1_PLL_MPU   CM_CLKSEL1_MPU_MULDIV_MASK         MPU_MULDIV_26
+MODIFY        CM_CLKSEL1_PLL       CM_CLKSEL1_CORE_MULDIV_MASK        CORE_MULDIV_26
+MODIFY        CM_CLKSEL2_PLL       CM_CLKSEL2_CORE_MULDIV_MASK_3630   PERIPH_MULDIV_26_3630
+MODIFY        CM_CLKEN_PLL_MPU     CM_CLKEN_MPU_FREQSEL_MASK          MPU_DPLL_FREQSEL
+MODIFY        CM_CLKEN_PLL         CM_CLKEN_CORE_PERIPH_FREQSEL_MASK  CORE_PERIPH_DPLL_FREQSEL
+WRITE         CM_CLKSEL2_PLL_MPU   0x00000001
+WRITE         CM_CLKSEL2_PLL_IVA2  0x00000001
+MODIFY        CM_CLKEN_PLL         EN_XXX_DPLL_MODE_MASK              EN_XXX_DPLL_LOCK_MODE
+POLL_NZERO    CM_IDLEST_CKGEN      CM_IDLEST_CKGEN_ST_CORE_CLK_MASK
+MODIFY        CM_CLKEN_PLL_MPU     EN_XXX_DPLL_MODE_MASK              EN_XXX_DPLL_LOCK_MODE
+POLL_NZERO    CM_IDLEST_PLL_MPU    CM_IDLEST_PLL_MPU_ST_MPU_CLK_MASK
+WRITE         CM_CLKSEL3_PLL       0x00000010
+WRITE         CM_CLKSEL3_PLL       0x00000009
+WRITE         CM_CLKSEL_DSS        0x00001006
+WRITE         CM_CLKSEL_CAM        0x00000004
+MODIFY        CM_CLKEN_PLL         EN_PERIPH_DPLL_MODE_MASK           EN_PERIPH_DPLL_LOCK_MODE
+POLL_NZERO    CM_IDLEST_CKGEN      ST_PERIPH_CLK_DPLL4_LOCKED
+WRITE         CM_FCLKEN1_CORE      0x43FFFE01
+WRITE         CM_ICLKEN1_CORE      0x63FFFED3
+WRITE         CM_FCLKEN_WKUP       0x000000E9
+WRITE         CM_ICLKEN_WKUP       0x0000002D
+WRITE         CM_FCLKEN_PER        0x0003FFFF
+WRITE         CM_ICLKEN_PER        0x0003FFFF
+
+# SDRC Configuration - Hynix 8 Gb
+
+WRITE         SDRC_SYSCONFIG     0x00000010
+POLL_NZERO    SDRC_STATUS        0x00000001
+WRITE         SDRC_SYSCONFIG     0x00000000
+WRITE         SDRC_SHARING       0x00000100
+WRITE         SDRC_MCFG_0        0x03690091
+WRITE         SDRC_RFR_CTRL_0    0x00025701   
+WRITE         SDRC_ACTIM_CTRLA_0 0x8BA6D6C9
+WRITE         SDRC_ACTIM_CTRLB_0 0x00012218   
+WRITE         SDRC_POWER         0x00000081
+WRITE         SDRC_MANUAL_0      0x00000000
+WRITE         SDRC_MANUAL_0      0x00000001
+WRITE         SDRC_MANUAL_0      0x00000002
+WRITE         SDRC_MANUAL_0      0x00000002
+WRITE         SDRC_MR_0          0x00000032
+WRITE         SDRC_MCFG_1        0x03690091
+WRITE         SDRC_RFR_CTRL_1    0x00025701   
+WRITE         SDRC_ACTIM_CTRLA_1 0x8BA6D6C9
+WRITE         SDRC_ACTIM_CTRLB_1 0x00012218   
+WRITE         SDRC_MANUAL_1      0x00000000
+WRITE         SDRC_MANUAL_1      0x00000001
+WRITE         SDRC_MANUAL_1      0x00000002
+WRITE         SDRC_MANUAL_1      0x00000002
+WRITE         SDRC_MR_1          0x00000032
+WRITE         SDRC_CS_CFG        0x00000004 
+WRITE         SDRC_DLLA_CTRL     0x0000000A
+POLL_ZERO     SDRC_DLLA_STATUS   0x00000004
+
+# Pin multiplexing
+
+MODE_16
+MODIFY         CONTROL_PADCONF_SDRC_DQS3_HI       0x001F     0x0008 # gpmc_a1
+MODIFY         CONTROL_PADCONF_GPMC_A2            0x001F     0x0008 # gpmc_a2
+MODIFY         CONTROL_PADCONF_GPMC_A2_HI         0x001F     0x0008 # gpmc_a3
+MODIFY         CONTROL_PADCONF_GPMC_A4            0x001F     0x0008 # gpmc_a4
+MODIFY         CONTROL_PADCONF_GPMC_A4_HI         0x001F     0x0008 # gpmc_a5
+MODIFY         CONTROL_PADCONF_GPMC_A6            0x001F     0x0008 # gpmc_a6
+MODIFY         CONTROL_PADCONF_GPMC_A6_HI         0x001F     0x0008 # gpmc_a7
+MODIFY         CONTROL_PADCONF_GPMC_A8            0x001F     0x0008 # gpmc_a8
+MODIFY         CONTROL_PADCONF_GPMC_A8_HI         0x001F     0x0008 # gpmc_a9
+MODIFY         CONTROL_PADCONF_GPMC_A10           0x001F     0x0008 # gpmc_a10
+MODIFY         CONTROL_PADCONF_GPMC_A10_HI        0x001F     0x0008 # gpmc_d0
+MODIFY         CONTROL_PADCONF_GPMC_D1            0x001F     0x0008 # gpmc_d1
+MODIFY         CONTROL_PADCONF_GPMC_D1_HI         0x001F     0x0008 # gpmc_d2
+MODIFY         CONTROL_PADCONF_GPMC_D3            0x001F     0x0008 # gpmc_d3
+MODIFY         CONTROL_PADCONF_GPMC_D3_HI         0x001F     0x0008 # gpmc_d4
+MODIFY         CONTROL_PADCONF_GPMC_D5            0x001F     0x0008 # gpmc_d5
+MODIFY         CONTROL_PADCONF_GPMC_D5_HI         0x001F     0x0008 # gpmc_d6
+MODIFY         CONTROL_PADCONF_GPMC_D7            0x001F     0x0008 # gpmc_d7
+MODIFY         CONTROL_PADCONF_GPMC_D7_HI         0x001F     0x0008 # gpmc_d8
+MODIFY         CONTROL_PADCONF_GPMC_D9            0x001F     0x0008 # gpmc_d9
+MODIFY         CONTROL_PADCONF_GPMC_D9_HI         0x001F     0x0008 # gpmc_d10
+MODIFY         CONTROL_PADCONF_GPMC_D11           0x001F     0x0008 # gpmc_d11
+MODIFY         CONTROL_PADCONF_GPMC_D11_HI        0x001F     0x0008 # gpmc_d12
+MODIFY         CONTROL_PADCONF_GPMC_D13           0x001F     0x0008 # gpmc_d13
+MODIFY         CONTROL_PADCONF_GPMC_D13_HI        0x001F     0x0008 # gpmc_d14
+MODIFY         CONTROL_PADCONF_GPMC_D15           0x001F     0x0008 # gpmc_d15
+MODIFY         CONTROL_PADCONF_GPMC_WAIT0         0x001F     0x0008 # gpmc_wait0
+MODIFY         CONTROL_PADCONF_GPMC_WAIT0_HI      0x001F     0x0008 # gpmc_wait1
+MODIFY         CONTROL_PADCONF_GPMC_WAIT2         0x001F     0x0008 # gpmc_wait2
+MODIFY         CONTROL_PADCONF_GPMC_WAIT2_HI      0x001F     0x0008 # gpmc_wait3
+MODIFY         CONTROL_PADCONF_GPMC_D15_HI        0x001F     0x0018 # gpmc_ncs0
+MODIFY         CONTROL_PADCONF_GPMC_NCS1          0x001F     0x0018 # gpmc_ncs1
+MODIFY         CONTROL_PADCONF_GPMC_NCS1_HI       0x001F     0x0018 # gpmc_ncs2
+MODIFY         CONTROL_PADCONF_GPMC_NCS3          0x001F     0x0018 # gpmc_ncs3
+MODIFY         CONTROL_PADCONF_GPMC_NADV_ALE      0x001F     0x0018 # gpmc_adv_ale
+MODIFY         CONTROL_PADCONF_GPMC_NADV_ALE_HI   0x001F     0x0018 # 
+MODIFY         CONTROL_PADCONF_GPMC_NWE           0x001F     0x0018 # gpmc_nwe
+MODIFY         CONTROL_PADCONF_GPMC_NWE_HI        0x001F     0x0018 # gpmc_nbe0_cle
+MODIFY         CONTROL_PADCONF_GPMC_NBE1          0x001F     0x0018 # gpmc_nbe1
+MODIFY         CONTROL_PADCONF_GPMC_NBE1_HI       0x001F     0x0018 # gpmc_nwp
+MODIFY         CONTROL_PADCONF_GPMC_NCS7          0x001F     0x0007 # gpmc_ncs7
+MODIFY         CONTROL_PADCONF_GPMC_NCS7_HI       0x001F     0x0000 # gpmc_clk
+
+# GPMC configuration
+
+MODE_32
+WRITE         GPMC_SYSCONFIG       0x00000010 # No idle L3 clock free running
+WRITE         GPMC_TIMEOUT_CONTROL 0x00000000 # Time out disabled
+WRITE         GPMC_IRQENABLE       0x00000000 # All interrupts disabled */
+WRITE         GPMC_CONFIG          0x00000010 # WP is made high and WAIT1 active Low */
+WRITE         GPMC_CONFIG7_0       0x00000000 # Reset all GPMC CS to inactive
+WRITE         GPMC_CONFIG7_1       0x00000000   
+WRITE         GPMC_CONFIG7_2       0x00000000   
+WRITE         GPMC_CONFIG7_3       0x00000000   
+WRITE         GPMC_CONFIG7_4       0x00000000   
+WRITE         GPMC_CONFIG7_5       0x00000000   
+WRITE         GPMC_CONFIG7_6       0x00000000   
+WRITE         GPMC_CONFIG7_7       0x00000000   
+
+# FPGA on CS3
+
+WAIT_N        0x1000
+WRITE         GPMC_CONFIG7_3       0x00000000
+WRITE         GPMC_CONFIG1_3       0x00611200
+WRITE         GPMC_CONFIG2_3       0x001F1F01
+WRITE         GPMC_CONFIG3_3       0x00080803
+WRITE         GPMC_CONFIG4_3       0x1D091D09
+WRITE         GPMC_CONFIG5_3       0x041D1F1F
+WRITE         GPMC_CONFIG6_3       0x1D0904C4
+WRITE         GPMC_CONFIG7_3       0x00000F48
+
+# SIBLEY 0 on CS0 (128 M initial size)
+
+WAIT_N        0x1000
+WRITE         GPMC_CONFIG7_0       0x00000000
+WRITE         GPMC_CONFIG1_0       0x00001200
+WRITE         GPMC_CONFIG2_0       0x001F1F00
+WRITE         GPMC_CONFIG3_0       0x00080802
+WRITE         GPMC_CONFIG4_0       0x1C091C09
+WRITE         GPMC_CONFIG5_0       0x01131F1F
+WRITE         GPMC_CONFIG6_0       0x1F0F03C2
+WRITE         GPMC_CONFIG7_0       0x00000850
+
+# NAND on CS1
+
+WAIT_N        0x1000
+WRITE         GPMC_CONFIG7_1       0x00000000
+WRITE         GPMC_CONFIG1_1       0x00001800
+WRITE         GPMC_CONFIG2_1       0x00141400
+WRITE         GPMC_CONFIG3_1       0x00141400
+WRITE         GPMC_CONFIG4_1       0x0F010F01
+WRITE         GPMC_CONFIG5_1       0x010C1414
+WRITE         GPMC_CONFIG6_1       0x1F0F0A80
+WRITE         GPMC_CONFIG7_1       0x00000F68
+
+# OneNAND on CS2
+
+WAIT_N        0x1000
+WRITE         GPMC_CONFIG7_2       0x00000000
+WRITE         GPMC_CONFIG1_2       0x00001200
+WRITE         GPMC_CONFIG2_2       0x000F0F01
+WRITE         GPMC_CONFIG3_2       0x00030301
+WRITE         GPMC_CONFIG4_2       0x0F040F04
+WRITE         GPMC_CONFIG5_2       0x010F1010
+WRITE         GPMC_CONFIG6_2       0x1F060000
+WRITE         GPMC_CONFIG7_2       0x00000F60
+WAIT_N        0x1000

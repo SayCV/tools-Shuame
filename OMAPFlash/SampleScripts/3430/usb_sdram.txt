@@ -1,0 +1,10 @@
+# OMAP3
+-omap 3
+# Timeout and other config
+-t 600 -p ZOOM2_MDDR_MICRON_2G -2 
+
+# RAM Download 
+chip_download SDRAM <binary file name>
+
+# Execute image from RAM
+command branch SDRAM 0

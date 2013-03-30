@@ -1,0 +1,28 @@
+## UBOOT_EMMC.TXT
+## --------------
+## Usage See Readme.txt Section: UBOOT Flashing (usb, using omapflash flashing algorithm for emmc)
+##
+
+-omap 4
+-t 36000 -p SEVM_MDDR_ELPIDA_4G -2 
+
+##This script require sysboot usb,emmc e.g. on on on on on on
+
+##xloader partition is at offset 20000
+chip_download EMMC@20000 uboot\x-load.bin
+
+##bootloader partition is at offset 80000
+##uboot that initial connect through uart
+chip_download EMMC@80000 uboot\u-boot.bin
+##alternative uboot that auto connect through usb
+#chip_download EMMC@80000 uboot\autofast_u-boot.bin
+
+##start emmc uboot
+command cold_sw_reset
+
+#todo add stuff to download EVM, kernel, file system through fastboot mode in uboot from eMMC only apply to autofast_u-boot.bin
+
+
+
+
+

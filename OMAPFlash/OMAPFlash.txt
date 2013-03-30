@@ -1,0 +1,392 @@
+-- Introduction --
+
+This document contains a description of a tool – OMAPFlash – that can be used to transfer binary images from a host PC to an OMAP based target 
+platform. The tool consists of four main components:
+
+  - a host application, called OMAPFlash Host
+  - a “second” loader, called OMAPFlash Second, specific to the platform with which OMAPFlash is used
+  - drivers for the memory devices of the platform
+  - a USB driver for the host PC, compatible with the OMAP device in use
+
+The tool makes use of the OMAP ROM code mechanism for peripheral boot from either UART or USB to transfer OMAPFlash Second to the internal memory 
+of the OMAP device. Using OMAPFlash Second a device driver is then transferred to SDRAM for the memory device to which the binary transfer is to 
+take place. Finally a binary file can be transferred through OMAPFlash Second and the device driver to the memory device itself.
+
+The communication protocol used between OMAPFlash Host and OMAPFlash Second is based on the Fastboot protocol used in the Android community – a 
+simple text based command-response protocol. Source code is available under a BSD-style license and may be used and modified for other platforms 
+freely as long as the license terms are observed.
+
+
+
+-- Installation --
+
+OMAPFlash comes as an installer for the Windows XP platform. Run the installer executable, OMAPFlashInstaller.msi, to install to the hard-drive of 
+the host PC. In some cases the installer will display a warning that a DLL has failed to register properly – should this happen, accept this and 
+press continue to complete the installation (it will not cause the tool to fail). The program is installed to the folder ‘c:\Program Files\Texas 
+Instruments\OMAPFlash’ and scripts are designed to be run from this path.
+
+Uninstalling OMAPFlash can be done through the Windows XP control panel (Start – Control Panel – Add or Remove Programs). Select OMAPFlash and 
+press ‘Remove’.
+
+
+
+-- Connections --
+
+The physical connection between the target platform and the host PC can be either UART or USB based and the actual connector to use will depend on 
+the platform. In general the user manual for the platform should be consulted in order to identify the connectors to use for peripheral boot.
+
+
+
+-- Drivers --
+
+When using the software with a USB connection, drivers will need to be installed. This should only be necessary when connecting the board to the 
+host PC for the first time. There are two USB drivers included in the installed software – one for the OMAP device (always needed) and one for the 
+Android Fastboot protocol (only needed if OMAPFlash is used with target software acting as a Fastboot protocol enabled device). Windows should 
+detect when a USB driver is needed and ask for it – the drivers are located in the usb_drv_windows folder under the installation directory for 
+OMAPFlash.
+
+For UART connectivity where UART communication is taking place of USB , a UART USB driver will be needed. This can be downloaded from 
+http://www.ftdichip.com/Drivers/VCP.htm. Whenever a new driver installation happens during a download attempt to a platform, the process will most 
+likely time out while the driver is being installed. Simply retry after the installation of the driver is completed.
+
+
+
+-- Usage --
+
+OMAPFlash Host is a command-line based application. It is currently available for Windows XP only and will run in a Windows command shell. The 
+application can take commands directly from the command line or via a script file (a more useful approach). The syntax for calling the tool is:
+
+omapflash [ <option> ] <command>
+
+or, if a script file is used:
+
+omapflash @<file>
+
+
+
+-- Options --
+
+The tool has a number of options that can be used to control its overall behavior. 
+
+  -com <port number>
+  By default OMAPFlash will try to communicate with the target platform using a USB serial link. This option will force OMAPFlash to use a UART for 
+  serial communication and specify the host side COM-port to use.
+
+  -t <timeout>
+  By default the timeout for communication on the serial link is 5 seconds. This option allows control of the timeout value by specifying another 
+  timeout value in seconds.
+
+  -p <platform>
+  This option is required by OMAPFlash and specifies the platform for which the download is to take place. The platform specified is a name tag that 
+  allows OMAPFlash to identify the correct second loader to use. The tag typically identifies the platform type and the memory used with the OMAP 
+  device present on the platform (“e.g. SDP_MDDR_HYNIX_4G). The tag is used to look up the second loader in a configuration file (omapflash2nd.txt) 
+  in combination with an OMAP device identifier received from the platform during peripheral boot.
+
+  -omap <version>
+  This option is required by OMAPFlash if a peripheral boot sequence is used to transfer a second loader to a target platform. The option specifies 
+  the OMAP generation used on the platform – without this option set, OMAPFlash will be unable to determine how to correctly perform the peripheral 
+  boot sequence necessary for transfer of the second loader to the platform. The version number is a single digit integer (e.g. ‘3’ for an OMAP3xxx 
+  based platform or ‘4’ for an OMAP4xxx based platform).
+
+  -2
+  This option controls whether OMAPFlash will try to use the ROM code peripheral boot sequence to transfer a second loader to internal RAM before 
+  doing anything else. This option will be required for most scenarios where OMAPFlash is used but can be left out if OMAPFlash Host is interacting 
+  with a second loader already running on a target platform.
+
+  -v
+  The ‘-v’ option controls whether OMAPFlash Host will run in verbose mode. If set, more information will be shown during the execution of the 
+  flashing sequence. Note that this option should be set in order to see the target platform response to certain commands (e.g. ‘chips’).
+
+
+
+-- Commands --
+
+Commands are executed on the target platform. Any command is prefixed by the keyword ‘command’ and anything following this keyword will be passed directly to OMAPFlash Second by OMAPFlash Host without interpretation or modification. Typically the ‘verbose’ option should be used with commands in order to ensure that information returned from the platform will be shown on the console.
+
+  branch <device> <offset>
+  This command will cause OMAPFlash Second to make an unconditional branch to a memory mapped address. The device will typically be the SDRAM 
+  handled by the OMAP SDRAM controller in this case, and the offset typically zero. The device ID must be one known by OMAPFlash Second and the 
+  offset an integer within the address offset range valid for the device.
+
+  peek32 <address>
+  Get the register value of the register with the given address.
+
+  poke32 <address> <value>
+  Modify the register at the given address to the given value
+
+  peekpoke32 <address> <value> <mask>
+  Modify the register at the given address with the given value and mask
+
+
+
+-- Flashing --
+
+OMAPFlash Host is able to handle three basic procedures for accessing memory devices through the OMAPFlash Second loader. These procedures are used
+to erase memory devices, transfer a binary file to a device or upload the device content to a binary file. In all cases, parameter values specifying 
+sizes or offsets are hexadecimal.
+
+  chip_erase <device>[@offset] <size>
+  This procedure is used to erase the content of a device, either for the whole device or for part of its address range. The ‘device’ identifier is 
+  a string matching one of the devices available on the platform as listed from the ‘chips’ command – in other words, a device known to OMAPFlash 
+  Second for the particular platform used (SDRAM is not a valid choice). If an ‘offset’ is used, the device erasure will start at the offset 
+  specified. The offset will need to be compatible with the memory structure of the device in question – e.g. if the device has a block size of 
+  40000h bytes, the offset will need to be a multiple of the block size. The ‘size’ specifies the number of bytes to erase – a value of zero has the 
+  special meaning of “to the end of the device”, either starting at offset zero or at the specified ‘offset’ value, and can be used to erase the 
+  entire device. Note that the typical erase functionality of a memory device is based on the erasure of blocks of memory – it may not make sense to 
+  ask for erasure of a size that is not a multiple of the block size of the device.
+
+  chip_download <device>[@offset] <file>
+  In order to transfer a binary file to a device on the platform this procedure is used. The ‘device’ identifier is a string matching one of the 
+  devices available on the platform. If an ‘offset’ is specified the binary will be downloaded to the device starting at the offset address 
+  specified. Using an offset should be done with some caution, since the meaning of the offset value may be unclear for some device types (e.g. for 
+  a NAND device the offset will be used without consideration of bad blocks present in the memory space preceding the offset address). The file to 
+  be downloaded is specified by the ‘file’ parameter and must be a raw image.  
+
+  chip_upload <device>[@offset] <size> <file>
+  In order to upload the content of a memory device this procedure is used. The ‘device’ identifier is a string matching one of the devices 
+  available on the platform. If an ‘offset’ is specified content will be uploaded from the device starting at the offset address specified. As for 
+  the ‘chip_download’ procedure the use of an offset should be done with caution. The ‘size’ parameter specifies the number of bytes to upload and 
+  the ‘file’ parameter the file to which the uploaded data will be saved. Note that due to some limitations on the serial link, upload of data will 
+  be considerably slower than download.
+
+
+
+-- Examples --
+
+The following examples are illustrations of the use of OMAPFlash. Sample scripts are available and installed with the tool.
+
+
+
+-- Commands --
+
+An example of a sequence making use of a command, including peripheral boot and download of OMAPFlash Second to the platform, could be:
+
+  omapflash -v -omap 3 -2 -p SDP_MDDR_HYNIX_4G -t 60 command peek32 6e00000
+
+Once OMAPFlash Second is present on the platform, commands can be run with the requirement for renewed peripheral boot:
+
+  omapflash -v –p SDP_MDDR_HYNIX_4G command peek32 6e000000
+
+
+
+-- Erase --
+
+An example of the erasure of the content of a device on a platform could be (for NAND):
+
+  omapflash -omap 3 -2 -p SDP_MDDR_HYNIX_4G -t 60 chip_erase NAND 0
+
+  » OMAPFlash vX.X (MMM DD YYYY)
+
+  » Please turn off device
+  » Please turn on device 
+  » Waiting for device
+  » Found device
+  » Searching 2nd for: SDP_MDDR_HYNIX_4G 363007 07 GP
+  » Loading second file Targets\2nd-Downloaders\dnld_startup_3630sdp_gp_hynix_4g.2nd
+  » Transferring second file to target (0x5FF8 bytes)
+  » Found device
+  » Waiting for 2nd
+  » Found 2nd
+  » Downloading driver
+  » Downloading 'Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin'
+  » Sending data (11412 bytes) :::::::::::::::::::: [11412]
+  » Downloading complete
+  » Elapsed time: 0:00.343 (33271 bytes/s)
+  » End loading driver
+  » Erasing
+           Erase progress :::::::::::::::::::: [536870912]
+  » Elapsed time: 0:24.537
+
+
+Additional information (e.g. bad block count, freed up memory and device information) may be available by including the verbose option:
+
+  omapflash -v -omap 3 -2 -p SDP_MDDR_HYNIX_4G -t 60 chip_erase NAND 0
+
+  » OMAPFlash vX.X (MMM DD YYYY)
+
+  » Please turn off device
+  » Please turn on device
+  » Waiting for device
+  » Found device
+  » Searching 2nd for: SDP_MDDR_HYNIX_4G 363007 07 GP
+  » Loading second file Targets\2nd-Downloaders\dnld_startup_3630sdp_gp_hynix_4g.2nd
+  » Transferring second file to target (0x5FF8 bytes)
+  » Found device
+  » Waiting for 2nd
+  » Found 2nd
+  » Downloading 'Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin'
+  » Sending data (11412 bytes) :::::::::::::::::::: [11412]
+           Interface 'OMAPFLASH DRIVER v1'
+           Driver 'NAND ONFI 16/8 BIT'
+           NAND ONFIv2 VENDOR 0x2C MICRON
+           NAND 16 BIT DEVICE 0xBC MT29F4G16ABC
+           NAND 2048 BYTES/PAGE (SPARE 64)
+           NAND 64 PAGES/BLOCK (131072 BYTES/BLOCK)
+           NAND 4096 BLOCKS/UNIT (536870912 BYTES/UNIT)
+           NAND 512 MB TOTAL SIZE
+           NAND ONFI DRIVER INIT COMPLETE
+  » Downloading complete
+  » Elapsed time: 0:00.344 (33174 bytes/s)
+  » End loading driver
+  » Erasing
+           name=NAND            address=0x28000000
+           Erasing to end of device starting at 0x28000000
+           Erase progress :::::::::::::::::::: [536870912]
+           NAND ERASED 535691264 BYTES FROM ADDRESS 0x28000000 (9 BAD BLOCKS)
+  » Elapsed time: 0:24.571
+
+
+If OMAPFlash Second is already present and running on the platform, it is not necessary to perform an additional peripheral boot:
+
+  omapflash chip_erase –p SDP_MDDR_HYNIX_4G NAND 0
+
+  » OMAPFlash vX.X (MMM DD YYYY)
+  
+  » Found device
+  » Downloading driver
+  » Downloading 'Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin'
+  » Sending data (11412 bytes) :::::::::::::::::::: [11412]
+  » Downloading complete
+  » Elapsed time: 0:00.344 (33174 bytes/s)
+  » End loading driver
+  » Erasing
+           Erase progress :::::::::::::::::::: [536870912]
+  » Elapsed time: 0:24.580
+
+
+
+-- Download --
+
+An example of download of a binary image to a memory device could be:
+
+  omapflash -omap 3 -2 -p SDP_MDDR_HYNIX_4G -t 60 chip_download NAND .\test_data\pattern_10M.bin
+
+  » OMAPFlash vX.X (MMM DD YYYY)
+
+  » Please turn off device
+  » Please turn on device
+  » Waiting for device
+  » Found device
+  » Searching 2nd for: SDP_MDDR_HYNIX_4G 363007 07 GP
+  » Loading second file Targets\2nd-Downloaders\dnld_startup_3630sdp_gp_hynix_4g.2nd
+  » Transferring second file to target (0x5FF8 bytes)
+  » Found device
+  » Waiting for 2nd
+  » Found 2nd
+  » Downloading driver
+  » Downloading 'Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin'
+  » Sending data (11412 bytes) :::::::::::::::::::: [11412]
+  » Downloading complete
+  » Elapsed time: 0:00.391 (29186 bytes/s)
+  » End loading driver
+  » Downloading
+  » Downloading '.\test_data\pattern_10M.bin'
+  » Sending data (10485760 bytes) :::::::::::::::::::: [10485760]
+  » Downloading complete
+  » Elapsed time: 0:35.095 (299593 bytes/s)
+  » Elapsed time: 0:35.334
+
+
+
+-- Upload --
+
+An example of uploading the content of a memory device from a platform could be:
+
+  omapflash -omap 3 -2 -p SDP_MDDR_HYNIX_4G -t 60 chip_upload NAND 40000 c:\temp\nand.bin
+
+  » OMAPFlash vX.X (MMM DD YYYY)
+
+  » Please turn off device
+  » Please turn on device
+  » Waiting for device
+  » Found device
+  » Searching 2nd for: SDP_MDDR_HYNIX_4G 363007 07 GP
+  » Loading second file Targets\2nd-Downloaders\dnld_startup_3630sdp_gp_hynix_4g.2nd
+  » Transferring second file to target (0x5FF8 bytes)
+  » Found device
+  » Waiting for 2nd
+  » Found 2nd
+  » Downloading driver
+  » Downloading 'Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin'
+  » Sending data (11412 bytes) :::::::::::::::::::: [11412]
+  » Downloading complete
+  » Elapsed time: 0:00.344 (33174 bytes/s)
+  » End loading driver
+  » Uploading 'NAND'
+           Receiving data (262144 bytes) :::::::::::::::::::: [262144]
+  » Elapsed time: 0:32.440
+  » Saving 'c:\temp\nand.bin'
+  » OKAY
+  » Elapsed time: 0:16.493
+
+
+
+-- Scripting - Download and Branch to SDRAM --
+
+The following script will download a binary to SDRAM via USB and branch to it for execution of the downloaded image:
+
+  # OMAP3
+  -omap 3
+  # Timeout and other config
+  -t 60 -p SDP_MDDR_HYNIX_4G -2 
+  # RAM Download 
+  chip_download SDRAM exbin.bin
+  # Execute image from RAM
+  command branch SDRAM 0
+
+Note that the branch address offset will depend on the binary - it will not always be zero. Store the script in a text file (e.g. usb_sdram.txt) and use it as an argument 
+to OMAPFlash:
+
+  omapflash @usb_sdram.txt
+
+
+
+-- Linux Flashing to eMMC --
+
+OMAPFlash does not support the flashing of a Linux file system to any memory device, including eMMC, since only RAW image downloads are supported. This means that the x-loader, boot loader and kernel can be transferred to eMMC by OMAPFlash as raw binaries, but not the file system used by the 
+Linux kernel. For flashing of the Linux kernel and file system, use U-Boot. 
+
+There are multiple options for transferring U-Boot to eMMC with OMAPFlash (note that eMMC is currently only supported for the OMAP4 based 
+platforms).
+
+
+-- U-Boot Assisted U-Boot Flashing --
+
+OMAPFlash supports the Fastboot protocol and there is a version of U-Boot available that can be used with the Fastboot protocol. With this version 
+of U-Boot it is possible to transfer binaries to eMMC via U-Boot. U-Boot is transferred to SDRAM and executed by OMAPFlash. Following this, U-Boot 
+is used to transfer binaries to eMMC by OMAPFlash by way of the Fastboot protocol. Do the following:
+
+   1) Copy the x-loader image (x-load.bin) to ‘c:\Program Files\Texas Instruments\OMAPFlash\ uboot\x-load.bin’
+   2) Copy the U-Boot image (u-boot.bin) to ‘c:\Program Files\Texas Instruments\OMAPFlash\uboot\u-boot.bin’
+   3) Connect USB and UART to the host PC (both are needed)
+   4) Start a terminal program (e.g. TeraTerm) with 115,200 baud, no parity, one stop bit, no flow control on what will be the UART connecting to 
+      COM3 on the platform
+   5) Set the SYSBOOT options of the platform to peripheral boot from USB
+   6) Open a console and change location to ‘c:\Program Files\Texas Instruments\OMAPFlash’
+   7) Run ‘OMAPFlash @uboot_ram.txt’ in order to transfer U-Boot to SDRAM and execute it
+   8) Go to the terminal program and type ‘fastboot’ in order to activate the Fastboot protocol mode of U-Boot
+   9) Await that the OMAPFlash script finishes in the console window
+  10) Change the SYSBOOT options to boot from eMMC
+  11) Power cycle the board
+
+Following this, U-Boot will be ready for commands via the terminal program and can be used to download kernel and file system.
+
+
+
+-- U-Boot Flashing --
+
+OMAPFlash supports the download of RAW binaries to eMMC via a native eMMC driver. The x-loader and U-Boot can be transferred to eMMC by OMAPFlash
+directly. Do the following:
+
+  1) Copy the x-loader image (x-load.bin) to ‘c:\Program Files\Texas Instruments\OMAPFlash\ uboot\x-load.bin’
+  2) Copy the U-Boot image (u-boot.bin) to ‘c:\Program Files\Texas Instruments\OMAPFlash\uboot\u-boot.bin’
+  3) Connect USB and UART to the host PC (both are needed)
+  4) Start a terminal program (e.g. TeraTerm) with 115,200 baud, no parity, one stop bit, no flow control on what will be the UART connecting to 
+     COM3 on the platform
+  5) Set the SYSBOOT options of the platform to peripheral boot from USB, eMMC
+  6) Open a console and change location to ‘c:\Program Files\Texas Instruments\OMAPFlash’
+  7) Run ‘OMAPFlash @uboot_emmc.txt’ in order to transfer x-loader and U-Boot to eMMC 
+  8) Await that the OMAPFlash script finishes in the console window
+
+Following this, U-Boot will be ready for commands via the terminal program and can be used to download kernel and file system.
+

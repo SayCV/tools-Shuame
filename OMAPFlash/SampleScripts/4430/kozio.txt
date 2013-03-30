@@ -1,0 +1,6 @@
+##kozio
+-omap 4
+-t 36000 -p SEVM_MDDR_ELPIDA_4G -2 
+
+chip_download SDRAM kozio\kDiagnostics\kdiags.sdp4430.bin
+command branch SDRAM 0x00100000

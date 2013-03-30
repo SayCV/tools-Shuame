@@ -1,0 +1,265 @@
+
+-- Introduction --
+
+This is a small porting guide for OMAPFlash. It contains an introduction to the modifications that may be necessary in order to get 
+OMAPFlash working on a new board or with a new memory device.
+
+
+
+-- Porting to a new platform --
+
+The main goal when trying to get OMAPFlash to work on a new plaform is to get the second loader ported to the platform. In general
+this should not require the recompilation of the code or modification of the second loader's code base. The starting point will be
+to create a board configuration file for the new platform.
+
+For the binary installed version of OMAPFlash, board configuration files are found in .\Targets\Configurations. For the source code 
+version of OMAPFlash, board configurations files are found in .\host\Targets\Configurations. In order to add support for a new platform 
+it is necessary to add a new board configuration file to the configuration folder. 
+
+Once the board configuration file has been created, it will need to be added to the content of omapflash2nd.txt, present in .\ of the binary release or .\host of the source code release. This file allows OMAPFlash to find the board configuration file and pairs it with a platform tag to be used with the -p option for OMAPFlash. When modifying the file, simply add a new line to it:
+
+
+  <platform> <omap id> <omap version> <omap type> <second loader file> -pheripheralboot_reopen -board_config <board configuration file>
+
+where <platform> is the platform name (use a new name for the new platform), <omap id> is an id number provided by the OMAP device during perfipheral boot over UART or USB along with the <omap version> number, <omap type> specifies whether the OMAP detected should be a High Security 'HS' or General Purpose 'GP' type, <second loader file> specifies the second loader to use with the combination of <platform>, <omap id>, <omap version> and <omap type> and the <board configuration file> is the newly added board configuration.
+
+An example could be:
+
+  SDP_MDDR_HYNIX_4G 363007 07 GP Targets\2nd-Downloaders\dnld_startup_omap3_gp_4g.2nd -pheriphalboot_reopen 
+  -board_config Targets\Configurations\configuration_sdp3630_hynix_4g.txt
+
+which specifies that if you specify the platform SDP_MDDR_HYNIX_4G through the -p option to OMAPFlash and the OMAP device detected is 363007v07GP, the second loader to use is 'Targets\2nd-Downloaders\dnld_startup_omap3_gp_4g.2nd' and the board configuration to use is 'Targets\Configurations\configuration_sdp3630_hynix_4g.txt'.
+
+Note that the binary installation currently comes with second loaders supporting memory sizes of (512 Mb, 1 Gb) 2 Gb, 4 Gb and 8 Gb for GP and HS devices:
+
+  dnld_startup_omap3_gp_512m.2nd        - OMAP3 GP w 512 Mb SDRAM 
+  dnld_startup_omap3_gp_1g.2nd          - OMAP3 GP w 1 Gb SDRAM 
+  dnld_startup_omap3_gp_2g.2nd          - OMAP3 GP w 2 Gb SDRAM 
+  dnld_startup_omap3_gp_4g.2nd          - OMAP3 GP w 4 Gb SDRAM
+  dnld_startup_omap3_gp_8g.2nd          - OMAP3 GP w 8 Gb SDRAM
+  dnld_startup_omap3_hs_512m.2nd        - OMAP3 HS w 512 Mb SDRAM
+  dnld_startup_omap3_hs_1g.2nd          - OMAP3 HS w 1 Gb SDRAM
+  dnld_startup_omap3_hs_2g.2nd          - OMAP3 HS w 2 Gb SDRAM
+  dnld_startup_omap3_hs_4g.2nd          - OMAP3 HS w 4 Gb SDRAM
+  dnld_startup_omap3_hs_8g.2nd          - OMAP3 HS w 8 Gb SDRAM
+  dnld_startup_omap4_gp_2g.2nd          - OMAP4 GP w 2 Gb SDRAM
+  dnld_startup_omap4_gp_4g.2nd          - OMAP4 GP w 4 Gb SDRAM
+  dnld_startup_omap4_gp_8g.2nd          - OMAP4 GP w 8 Gb SDRAM
+  dnld_startup_omap4_hs_2g_es1.s1.2nd   - OMAP4 ES1.0 HS w 2 Gb SDRAM
+  dnld_startup_omap4_hs_4g_es1.s1.2nd   - OMAP4 ES1.0 HS w 4 Gb SDRAM
+  dnld_startup_omap4_hs_8g_es1.s1.2nd   - OMAP4 ES1.0 HS w 8 Gb SDRAM
+  dnld_startup_omap4_hs_2g_es2.s1.2nd   - OMAP4 ES2.0 / ES2.1 HS w 2 Gb SDRAM
+  dnld_startup_omap4_hs_4g_es2.s1.2nd   - OMAP4 ES2.0 / ES2.1 HS w 4 Gb SDRAM
+  dnld_startup_omap4_hs_8g_es2.s1.2nd   - OMAP4 ES2.0 / ES2.1 HS w 8 Gb SDRAM
+  dnld_startup_omap4_hs_2g_es2.s2.2nd   - OMAP4 ES2.2 HS w 2 Gb SDRAM
+  dnld_startup_omap4_hs_4g_es2.s2.2nd   - OMAP4 ES2.2 HS w 4 Gb SDRAM
+  dnld_startup_omap4_hs_8g_es2.s2.2nd   - OMAP4 ES2.2 HS w 8 Gb SDRAM
+
+The reason for this is that there is a link-time dependency on the placment of the heap and external memory for the memory device drivers in SDRAM and on the location of the second loader components in internal memory between HS and GP devices. Pick the right one - e.g. if you have a 4 Gbit memory on an OMAP3 GP based board, use 'dnld_startup_omap3_gp_4g.2nd'.
+
+
+
+-- Board configuration --
+
+In order to create the new file it is often useful to start with a copy of one of the existing files. The file has three main sections:
+
+  1) 'use' directive, pointing to a definition file listing a number of OMAP registers and their addresses
+  2) 'memory' directives, specifying the memories on the platform
+  3) initialization commands, modifying registers to control the configuration of the OMAP to match the platform
+
+
+
+-- Definitions --
+
+A 'use' directive can be used to point to a device definition file, e.g.:
+
+  use definitions_omap3.txt
+
+Only one definition file can be used and it must be indicated before the first element using its definitions occurs in the configuration 
+file.
+
+The device definition file basically holds a set of paired of labels and values. The labels can be used in the device configuration fil in place
+of the values in order to make the device configuration file more readable. The syntax is as follows
+
+PRM_CLKSRC_CTRL                           0x48307270
+CM_CLKEN_PLL                              0x48004D00 
+PRM_CLKSEL		                            0x48306D40 
+CM_CLKSEL1_PLL                            0x48004D40 
+CM_CLKSEL2_PLL                            0x48004D44 
+CM_CLKSEL3_PLL                            0x48004D48 
+
+A maximum of 1000 definition pairs can be present in a definition file.
+
+
+
+-- Memories --
+
+Memories are specified using the 'memory' directive:
+
+  memory NAME [driver DRIVER] [parameters PARAMETER1 VALUE1 PARAMETER2 VALUE2 ... PARAMETERN VALUEN]
+
+An example of a memory specification could be:
+
+  memory NAND driver Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin parameters gpmc 0x6E000000 cs 1 address 0x28000000 bberase 0
+
+where the device name is NAND and the driver required to access it is present in the binary file nand_onfi_16bit_8bit.bin (part of this 
+distribution). The driver needs a number of configuration parameters for correct operation. These are passed directly to driver as 
+written on the line following the 'parameters' keyword. This distribution contains a number of driver binaries for various memory types. 
+At present these are:
+
+  File      : nand_onfi_16bit_8bit.bin
+  Type      : NAND
+  Parameters: gpmc      (mandatory)               Base address of the GPMC in the OMAP
+              cs        (mandatory)               Chip select where the device is present (or GPMC-config index)
+              address   (mandatory)               Address of the device as mapped in the GPMC
+              bberase   (mandatory)               Erase bad blocks in the device (0 for no, 1 for yes). Caution: erasing bad blocks may 
+                                                  cause an irreversible loss of manufacturing information.
+              onfi      (optional)                Read and use ONFI device description from the device (0 for no, 1 for yes).
+              bpp       (mandatory if onfi = 0)   Bytes per page if ONFI information is not used.
+              sbpp      (mandatory if onfi = 0)   Spare bytes per page if ONFI information is not used.
+              ppb       (mandatory if onfi = 0)   Pages per block if ONFI information is not used
+              bpl       (mandatory if onfi = 0)   Blocks per logical unit if ONFI information is not used
+              l         (mandatory if onfi = 0)   Logical unit count (only 1 supported by the driver)
+              acv       (mandatory if onfi = 0)   Address cycle values - 8 bit value with lower 4 bits for row and upper 4 bits for 
+                                                  column.
+              f         (mandatory if onfi = 0)   Features - 16 bit value with bit 0 = 16 bit data operation, rest are don't-care
+  Examples  : memory NAND driver Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin parameters gpmc 0x6E000000 cs 1 address 0x28000000 
+              bberase 0
+              memory NAND driver Targets\Flash-Drivers\nand_onfi_16bit_8bit.bin parameters gpmc 0x6E000000 cs 1 address 0x28000000 
+              bberase 0 onfi 0 bpp 2048 sbpp 64 ppb 64 bpl 4096 l 1 acv 0x23 f 0x0019
+              
+
+  File      : nor_intel_sibley_drv.bin
+  Type      : NOR
+  Parameters: address   (mandatory)               Base address of the device in the memory map
+  Examples  : memory SIBLEY0 driver Targets\Flash-Drivers\nor_intel_sibley_drv.bin parameters address 0x10000000
+
+
+  File      : onenand_drv.bin
+  Type      : OneNAND (inherently supports Samsung KFM1G16Q2M and KFM2G16Q2M, but parameters can be set to allow the driver to function 
+              with other devices)
+  Parameters: address   (mandatory)               Base address of the device as configured
+              bberase   (mandatory)               Erase bad blocks in the device (0 for no, 1 for yes). Caution: erasing bad blocks may 
+                                                  cause an irreversible loss of manufacturing information.
+              w         (optional)                Sets the bus-width for the device and controls whether additional parameters are given. 
+                                                  Currently only a 16-bit bus width is supported (value must be 16). 
+              b         (mandatory if w)          Number of blocks if device is not inherently supported
+              ppb       (mandatory if w)          Pages per block if device is not inherently supported
+              spp       (mandatory if w)          Sectors per page if device is not inherently supported
+              ssize     (mandatory if w)          Sector size in butes if device is not inherently supported
+  Examples  : memory ONENAND driver Targets\Flash-Drivers\onenand_drv.bin parameters address 0x20000000 bberase 0
+              memory ONENAND driver Targets\Flash-Drivers\onenand_drv.bin parameters address 0x20000000 bberase 0 w 16 b 2048 ppb 64 spp 4 ssize 512
+
+
+
+  File      : emmc_drv.bin
+  Type      : EMMC (OMAP4)
+  Parameters: sid       (mandatory)               MMC slot ID
+              width     (mandatory)               Width of data bus in bits
+              delay     (mandatory)               Loop delay on command access (default should be 9)
+              rpapi     (mandatory)               Set the base address of the ROM code Public API
+              mblock    (optional)                Control whether multi-block write access is used (default, 1) or not (0).
+              hd        (optional)                Control whether eMMC device is a high density device (default, 1) or not (0)
+              maxclk    (optional)                Set a max clock rate for the MMC interface. Default is the card maximum clock
+                                                  rate. The value controls the divisor on the controller (e.g. 96000 / 48000 = 2).
+              to         (optional)                To specify the timeout value (in millisec) for eMMC commands. Default is 512 millisec.
+              tot        (optional)                Time to sleep before a status check is done during the timeout period. Default is 1 millisec.
+              initto     (optional)                To specify amount of time to check for busy state in the init function.
+
+  Example   : memory EMMC  driver Targets\Flash-Drivers\emmc_drv.bin parameters sid 1 width 4 delay 9 rpapi 0x00020400 mblock 1 hd 1 maxclk 48000 to 512 tot 10
+
+
+  File      : nor_amd_drv.bin
+  Type      : NOR
+  Parameters: address   (mandatory)               Base address of the device in the memory map
+              wrbuf     (optional)                Use buffered write access (CURRENTLY NOT FUNCTIONAL). Default is off (0).
+              echeck    (optional)                Check whether a block needs to be erased before erasing. Default is off (0).
+              log       (optional)                Log events to the event tracer in the second loader. Default is no (0).
+  Example   : memory NOR driver Targets\Flash-Drivers\nor_amd_drv.bin parameters address 0x10000000 wrbuf 0 echeck 1 log 0
+
+
+  File      : nor_numonyx_drv.bin
+  Type      : NOR
+  Parameters: address   (mandatory)               Base address of the device in the memory map
+              echeck    (optional)                Check whether a block needs to be erased before erasing. Default is off (0).
+              wmode     (optional)                Write mode - choice between single word (0x01), double word (0x02), quad word (0x04)
+                                                  or single word enhance factory (0xe1). Only single word has been proven.
+              log       (optional)                Log events to the event tracer in the second loader. Default is no (0).
+  Example   : memory NOR driver Targets\Flash-Drivers\nor_numonyx_drv.bin parameters address 0x10000000 echeck 1 wmode 0x01 log 0
+
+
+
+For SDRAM, no driver is required, but the memory type must be specified with one parameter stating the base address in the memory map, 
+e.g.:
+
+  memory SDRAM parameters address 0x80000000
+
+
+
+-- Initialization of OMAP --
+
+A number of register operation commands can be used to configure the OMAP device:
+
+WRITE        - Write a value to a register
+MODIFY       - Modify the value of a register
+POLL_ZERO    - Poll a register value until zero
+POLL_NZERO   - Poll a register value until not zero
+POLL_VALUE   - Poll a register until value
+WAIT_N       - Loop n times in a simple while-loop (where n is a value from 0x0000 to 0xFFFF)
+SPIN         - Loop forever. This may be used for debugging.
+RPAPI        - Set the base address of the ROM code Public API
+MODE_16      - Use 16 bit register access mode
+MODE_32      - Use 32 bit register access mode
+
+The command structures are:
+
+WRITE        : WRITE REGISTER VALUE
+MODIFY       : MODIFY REGISTER MASK VALUE 
+POLL_ZERO    : POLL_ZERO REGISTER MASK
+POLL_NZERO   : POLL_NZERO REGISTER MASK
+POLL_VALUE   : POLL_VAL REGISTER MASK VALUE
+WAIT_N       : WAIT_N N
+SPIN         : SPIN
+RPAPI        : RPAPI ADDRESS
+MODE_16      : MODE_16
+MODE_32      : MODE_32
+
+The definitions included from a defintion file specified in a 'use' directive can be used with the commands. Definitions can be used for registers, values and masks, e.g.:
+
+MODIFY        CM_CLKEN_PLL_MPU     EN_XXX_DPLL_MODE_MASK              EN_XXX_DPLL_LOCK_MODE
+WRITE         CM_CLKSEL3_PLL       0x00000009
+POLL_ZERO     CM_IDLEST_CKGEN      ST_PERIPH_CLK_DPLL4_LOCKED
+
+
+
+-- New memory device --
+
+If you need to add a new memory device driver, you will need to create a new driver binary with a standard OMAPFlash driver interface. The easiest way is to use on of the existing driver projects as a template in the source release. There are a number of things to take into account:
+
+- A driver binary must be relocateable, which means that it cannot have globale variables (unless some programming tricks are used to work around this). Variables must be stored in a structure allocated run-time.
+- A driver has a standard interface defined by a structure in flash_drv.h
+- There is a standard parser available for dealing with parameters passed to the driver by OMAPFlash (see above).
+- The driver will be provided a set of functions for accessing functionality in the second loader, e.g. for sending messages to OMAPFlash or allocating memory.
+- Each call to the driver from the second loader must result in either FLASH_DRV_SUCCESS or FLASH_DRIVER_ERROR. If there is an error, there is a pointer to assign a descriptive text for the problem.
+
+The standard interface structure that will be used by the second loader to access the driver functionality has the following functions:
+
+- init
+  Called by the second loader in order to initialize the driver and let it do anything needed in order to function properly. A pointer to   a configuration structure is provided. The configuration stucture contains function pointers for utility functions provided by the second   loader, the configuration parameters defined in the board configuration file for the memory (see above) and a pointer to which the driver   can allocate a structure for storage of persistant data. The configuration structure will be maintained by the second loader and provided   to the driver in all function calls from the second loader.
+
+- erase 
+  Function for erasing memory from location with lenght of the memory area to erase. Note that a length of zero must mean 'from given   address to end of device'.
+
+- write
+  Function for writing to a location. A parameter will tell the driver whether more data is to be expected or whether this is the final   call to the write function.
+
+- read
+  Function for reading data from a location.
+
+- deinit
+  Deinitialization function. Must deallocate memory.
+
+- get_info
+  Must return information to the second loader for the device.
+
+The interface structure contains an 'interface-version' specifier that will be checked by the second loader when the driver has been downloaded. If the version of the interface used by the driver is different from that used by the second loader, the driver initialization function will not be called and the driver initialization will fail.

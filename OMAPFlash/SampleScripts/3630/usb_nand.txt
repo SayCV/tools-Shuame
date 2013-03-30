@@ -1,0 +1,21 @@
+# OMAP3
+-omap 3
+# Timeout and other config
+-t 600 -p SDP_MDDR_HYNIX_4G -2 
+
+# Erase one block starting at offset 0
+chip_erase NAND 20000
+# Erase one block starting at an offset of one block
+chip_erase NAND@20000 20000
+# Erase the entire device
+chip_erase NAND 0
+# Erase to the end of the decvice starting at an offset of one block
+chip_erase NAND@20000 0
+
+# Download binary to start of device (depending on bad blocks)
+chip_download NAND .\test_data\pattern_1K.bin
+# Download binary to device starting af offset 20000h (depending on bad blocks)
+chip_download NAND@20000 .\test_data\pattern_1K.bin
+
+# Upload 400h bytes of data
+chip_upload NAND 400 c:.\temp\upload.bin

@@ -1,0 +1,33 @@
+##
+# Copyright (C) 2010-2011, Samsung Electronics, Co., Ltd. All Rights Reserved.
+#  Written by System S/W Group, S/W Platform R&D Team,
+#  Mobile Communication Division.
+##
+
+##
+# Project Name : Proxima GED
+#
+# Project Description :
+#
+# Comments : tabstop = 8, shiftwidth = 8, noexpandtab
+##
+
+##
+# File Name : omap4460_tuna_hs.txt
+#
+# File Description :
+#
+# Author : System Platform 2
+# Dept : System S/W Group (S/W Platform R&D Team)
+# Created : 17/Aug/2011
+# Version : Baby-Raccoon
+##
+
+-omap 4
+ -t 36000 -p OMAP4460_TUNA_8G_HS_ENG -2
+
+#chip_download EMMC@0 Targets\Projects\tuna\MBR.bin
+chip_download EMMC@20000 Targets\Projects\tuna\MLO_4460_HS_ENG
+chip_download EMMC@80000 Targets\Projects\tuna\sbl.img
+
+command cold_sw_reset

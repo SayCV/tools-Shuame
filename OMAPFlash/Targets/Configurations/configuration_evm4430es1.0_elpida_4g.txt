@@ -1,0 +1,328 @@
+# Specify platform memories
+
+memory EMMC  driver Targets\Flash-Drivers\emmc_drv.bin parameters sid 1 width 4 delay 9 rpapi_base 0x00020400
+memory SDRAM parameters address 0x80000000
+
+# Get device definitions
+
+use .\targets\definitions\definitions_omap4.txt
+
+RPAPI_BASE   0x00020400
+
+MODE_32
+
+# no dpll lock
+WRITE         CM_CLKMODE_DPLL_CORE              0x00000004
+POLL_VALUE    CM_MEMIF_CLKSTCTRL                0x00000700            0x00000700
+WRITE         CM_MEMIF_EMIF_1_CLKCTRL           0x00000002
+WRITE         CM_MEMIF_EMIF_2_CLKCTRL           0x00000002
+WRITE         EMIF1_PWR_MGMT_CTRL               0x00000000
+WRITE         EMIF2_PWR_MGMT_CTRL               0x00000000
+
+MODIFY        CONTROL_LPDDR2IO1_0               0x38383838            0x18181818
+MODIFY        CONTROL_LPDDR2IO1_1               0x38383838            0x18181818
+MODIFY        CONTROL_LPDDR2IO1_2               0x38383800            0x18181800
+MODIFY        CONTROL_LPDDR2IO2_0               0x38383838            0x18181818
+MODIFY        CONTROL_LPDDR2IO2_1               0x38383838            0x18181818
+MODIFY        CONTROL_LPDDR2IO2_2               0x38383800            0x18181800
+
+MODIFY        CONTROL_EFUSE_2                   0x00FFC000            0x00FFC000
+
+# Configure EMIF1
+WRITE         EMIF1_SDRAM_CONFIG                0x80800EB1
+WRITE         EMIF1_DDR_PHY_CTRL_1              0x849FFFF4
+WRITE         EMIF1_DDR_PHY_CTRL_1_SHDW         0x849FF404
+WRITE         EMIF1_DDR_PHY_CTRL_2              0x00000000
+WRITE         EMIF1_READ_IDLE_CTRL              0x000501FF
+WRITE         EMIF1_READ_IDLE_CTRL_SHDW         0x000501FF
+WRITE         EMIF1_SDRAM_TIM_1                 0x04442049
+WRITE         EMIF1_SDRAM_TIM_1_SHDW            0x10EB065A
+WRITE         EMIF1_SDRAM_TIM_2                 0x1002008A
+WRITE         EMIF1_SDRAM_TIM_2_SHDW            0x20370DD2
+WRITE         EMIF1_SDRAM_TIM_3                 0x0040802F
+WRITE         EMIF1_SDRAM_TIM_3_SHDW            0x00B1C33F
+# poll MR0 register (DAI bit)
+# REG_CS[31] = 0 -- Mode register command to CS0
+# REG_REFRESH_EN[30] = 1 -- Refresh enable after MRW
+# REG_ADDRESS[7:0] = 00 -- Refresh enable after MRW
+WRITE         EMIF1_LPDDR2_MODE_REG_CFG         0x00000000
+POLL_ZERO     EMIF1_LPDDR2_MODE_REG_DATA        0x00000001
+WRITE         EMIF1_LPDDR2_MODE_REG_CFG         0x0000000A
+WRITE         EMIF1_LPDDR2_MODE_REG_DATA        0x000000FF
+# wait for tZQINIT=1us
+WAIT_N        0xB00
+WRITE         EMIF1_LPDDR2_MODE_REG_CFG         0x00000001
+WRITE         EMIF1_LPDDR2_MODE_REG_DATA        0x00000023
+WRITE         EMIF1_LPDDR2_MODE_REG_CFG         0x00000002
+WRITE         EMIF1_LPDDR2_MODE_REG_DATA        MR2_RL6_WL3
+# initial phy ctrl values
+WRITE         EMIF1_SDRAM_CONFIG                0x80801AB1
+WRITE         EMIF1_DDR_PHY_CTRL_1              0x849FFFF8
+WRITE         EMIF1_DDR_PHY_CTRL_1_SHDW         0x849FF408
+# EMIF_SDRAM_REF_CTRL
+# refresh rate = DDR_CLK / reg_refresh_rate
+# 3.9 uS = (400MHz)    / reg_refresh_rate
+WRITE         EMIF1_SDRAM_REF_CTRL              0x0000004A
+WRITE	        EMIF1_SDRAM_REF_CTRL_SHDW         0x000005CD
+WRITE         EMIF1_LPDDR2_MODE_REG_CFG         0x40000010
+WRITE         EMIF1_LPDDR2_MODE_REG_DATA        0x00000000
+
+# Configure EMIF2
+WRITE         EMIF2_SDRAM_CONFIG                0x80800EB1
+WRITE         EMIF2_DDR_PHY_CTRL_1              0x849FFFF4
+WRITE         EMIF2_DDR_PHY_CTRL_1_SHDW         0x849FF404
+WRITE         EMIF2_DDR_PHY_CTRL_2              0x00000000
+WRITE         EMIF2_READ_IDLE_CTRL              0x000501FF
+WRITE         EMIF2_READ_IDLE_CTRL_SHDW         0x000501FF
+WRITE         EMIF2_SDRAM_TIM_1                 0x04442049
+WRITE         EMIF2_SDRAM_TIM_1_SHDW            0x10EB065A
+WRITE         EMIF2_SDRAM_TIM_2                 0x1002008A
+WRITE         EMIF2_SDRAM_TIM_2_SHDW            0x20370DD2
+WRITE         EMIF2_SDRAM_TIM_3                 0x0040802F
+WRITE         EMIF2_SDRAM_TIM_3_SHDW            0x00B1C33F
+# poll MR0 register (DAI bit)
+# REG_CS[31] = 0 -- Mode register command to CS0
+# REG_REFRESH_EN[30] = 1 -- Refresh enable after MRW
+# REG_ADDRESS[7:0] = 00 -- Refresh enable after MRW
+WRITE         EMIF2_LPDDR2_MODE_REG_CFG         0x00000000
+POLL_ZERO     EMIF2_LPDDR2_MODE_REG_DATA        0x00000001
+WRITE         EMIF2_LPDDR2_MODE_REG_CFG         0x0000000A
+WRITE         EMIF2_LPDDR2_MODE_REG_DATA        0x000000FF
+# wait for tZQINIT=1us
+WAIT_N        0xB00
+WRITE         EMIF2_LPDDR2_MODE_REG_CFG         0x00000001
+WRITE         EMIF2_LPDDR2_MODE_REG_DATA        0x00000023
+WRITE         EMIF2_LPDDR2_MODE_REG_CFG         0x00000002
+WRITE         EMIF2_LPDDR2_MODE_REG_DATA        MR2_RL6_WL3
+# initial phy ctrl values
+WRITE         EMIF2_SDRAM_CONFIG                0x80801AB1
+WRITE         EMIF2_DDR_PHY_CTRL_1              0x849FFFF8
+WRITE         EMIF2_DDR_PHY_CTRL_1_SHDW         0x849FF408
+# EMIF_SDRAM_REF_CTRL
+# refresh rate = DDR_CLK / reg_refresh_rate
+# 3.9 uS = (400MHz)    / reg_refresh_rate
+WRITE         EMIF2_SDRAM_REF_CTRL              0x0000004A
+WRITE	        EMIF2_SDRAM_REF_CTRL_SHDW         0x000005CD
+WRITE         EMIF2_LPDDR2_MODE_REG_CFG         0x40000010
+WRITE         EMIF2_LPDDR2_MODE_REG_DATA        0x00000000
+
+WRITE         CM_CLKSEL_CORE                    0x00000110
+WRITE         CM_CLKSEL_ABE                     0x00000500
+WRITE         CM_CLKSEL_DPLL_CORE               0x0001F018
+WRITE         CM_DIV_M2_DPLL_CORE               0x00000101
+WRITE         CM_DIV_M3_DPLL_CORE               0x00000105
+WRITE         CM_DIV_M4_DPLL_CORE               0x00000108
+WRITE         CM_DIV_M5_DPLL_CORE               0x00000104
+WRITE         CM_DIV_M6_DPLL_CORE               0x00000106
+WRITE         CM_DIV_M7_DPLL_CORE               0x00000108
+WRITE         CM_AUTOIDLE_DPLL_CORE             0x00000000   # disable autoidle
+
+#  Lock the core dpll using freq update method 
+WRITE         CM_CLKMODE_DPLL_CORE              0x00000008
+
+#  CM_SHADOW_FREQ_CONFIG1: DLL_OVERRIDE = 1(hack), DLL_RESET = 1,
+#  DPLL_CORE_M2_DIV =1, DPLL_CORE_DPLL_EN = 0x7, FREQ_UPDATE = 1
+WRITE         CM_SHADOW_FREQ_CONFIG1            0x00000F0D
+
+#  Wait for Freq_Update to get cleared: CM_SHADOW_FREQ_CONFIG1
+POLL_ZERO     CM_SHADOW_FREQ_CONFIG1            0x00000001
+
+# Wait for DPLL to Lock : CM_IDLEST_DPLL_CORE
+POLL_NZERO    CM_IDLEST_DPLL_CORE               0x00000001
+
+WRITE         CM_DLL_CTRL                       0x00000000
+WAIT_N        0xD100
+
+# Check for DDR PHY ready for EMIF1 and EMIF2
+POLL_NZERO    EMIF1_STATUS                      0x00000004
+POLL_NZERO    EMIF2_STATUS                      0x00000004
+
+# Reprogram the DDR PYHY Control register PHY control values
+WRITE         CM_MEMIF_EMIF_1_CLKCTRL           0x00000001
+WRITE         CM_MEMIF_EMIF_2_CLKCTRL           0x00000001
+
+# Put the Core Subsystem PD to ON State
+WRITE         PM_CORE_PWRSTCTRL                 0x00030E03
+
+WRITE         EMIF1_PWR_MGMT_CTRL               0x80000000
+WRITE         EMIF2_PWR_MGMT_CTRL               0x80000000
+
+WRITE         DMM_LISA_MAP_REGISTER_0           0x80540300
+WRITE         DMM_LISA_MAP_REGISTER_1           0x00000000
+WRITE         DMM_LISA_MAP_REGISTER_2           0x00000000
+WRITE         DMM_LISA_MAP_REGISTER_3           0xFF020100
+
+# Enable clocks
+
+WRITE         CM_ABE_PLL_REF_CLKSEL             0x00000000
+WRITE         CM_SYS_CLKSEL                     0x00000007
+
+# Increase voltage and frequency
+
+WRITE         PRM_VC_CFG_I2C_MODE               0x00000000
+WRITE         PRM_VC_CFG_I2C_CLK                0x00006026
+# set VCORE1 force VSEL
+WRITE         PRM_VC_VAL_BYPASS                 0x00395512
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# set VCORE1 volt VSEL
+WRITE         PRM_VC_VAL_BYPASS                 0x00395612
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# set VCORE2 force VSEL (1.21 V)
+WRITE         PRM_VC_VAL_BYPASS                 0x00315B12
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# set VCORE2 volt VSEL (1.21 V)
+WRITE         PRM_VC_VAL_BYPASS                 0x00315C12
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# set VCORE3 force VSEL (1.21 V)
+WRITE         PRM_VC_VAL_BYPASS                 0x00316112
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# set VCORE3 volt VSEL (1.21 V)
+WRITE         PRM_VC_VAL_BYPASS                 0x00316212
+MODIFY        PRM_VC_VAL_BYPASS                 0x01000000        0x01000000
+POLL_ZERO     PRM_VC_VAL_BYPASS                 0x01000000
+MODIFY        PRM_IRQSTATUS_MPU                 0x00000000        0x00000000
+# Lock MPU DPLL at 600MHz
+WRITE         CM_CLKMODE_DPLL_MPU               0x00000004
+WRITE         CM_CLKSEL_DPLL_MPU                0x00807D07
+WRITE         CM_DIV_M2_DPLL_MPU                0x00000101
+WRITE         CM_AUTOIDLE_DPLL_MPU              0x00000000
+WRITE         CM_CLKMODE_DPLL_MPU               0x00000017
+POLL_ZERO     CM_IDLEST_DPLL_MPU                0x00000001
+
+# Enable PRM:
+WRITE         PM_MPU_PWRSTCTRL                  0x00000707		# Put the MPU Subsystem PD to ON State: And Keep MEM,L2,L1 and Logic O
+WRITE         PM_PDA_CPU0_PWRSTCTRL             0x00000007    # Put the CPU0 PD to ON State : And Logic ON Alway
+WRITE         PM_PDA_CPU1_PWRSTCTRL             0x00000007    # Put the CPU1 PD to ON State : And Logic ON Alway
+
+# WKUP Domain Clocks
+WRITE         CM_WKUP_CLKSTCTRL                 0x00000003    # [2:0]: Enable HW_AUTO transitio
+WRITE         CM_WKUP_WDTIMER2_CLKCTRL          0x00000002    # [1:0]: Module is explicitly enable
+WRITE         CM_WKUP_GPIO1_CLKCTRL             0x00000101    # [8]: Optional clock on; [1:0]: Module is HW auto controlle
+WRITE         CM_WKUP_GPTIMER1_CLKCTRL          0x01000002    # Input clock source is set to 32KHz. And explicit enable of module
+WRITE         CM_WKUP_KEYBOARD_CLKCTRL          0x00000002    # [1:0]: Module is explicitly enable
+
+# CORE_CM2 Domain Clocks
+WRITE         CM_L3_2_GPMC_CLKCTRL              0x00000001    # Module is HW Auto controlle
+WRITE         CM_MPU_M3_CLKSTCTRL               0x00000002    # Start SW_WKUP force Wakeu
+WRITE         CM_MPU_M3_MPU_M3_CLKCTRL          0x00000001    # Module is HW Auto controlle
+
+# Wait for Corresponding clock is running or Gating/Ungating transition is on-going
+POLL_NZERO	  CM_MPU_M3_CLKSTCTRL               0x00000100
+
+WRITE         CM_SDMA_CLKSTCTRL                 0x00000002    # Start SW_WKUP force Wakeu
+
+# Wait for Corresponding clock is running or Gating/Ungating transition is on-going
+POLL_NZERO	  CM_SDMA_CLKSTCTRL                 0x00000100
+
+WRITE         CM_C2C_CLKSTCTRL                  0x00000002    # Start SW_WKUP force Wakeu
+
+# Wait for Corresponding clock is running or Gating/Ungating transition is on-going
+POLL_VALUE    CM_C2C_CLKSTCTRL                  0x00000300              0x00000300
+
+WRITE         CM_L3INSTR_L3_3_CLKCTRL           0x00000001    # Module is HW Auto controlle
+WRITE         CM_L3INSTR_L3_INSTR_CLKCTRL       0x00000001    # Module is HW Auto controlle
+WRITE         CM_L3INSTR_INTRCONN_WP1_CLKCTRL   0x00000001    # Module is HW Auto controlle
+
+# After the wakeup reconfigure clock modules
+WRITE         CM_MPU_M3_CLKSTCTRL               0x00000003    # HW_AUTO transition is enable
+WRITE         CM_SDMA_CLKSTCTRL                 0x00000000    # NO_SLEEP transition is enable
+WRITE         CM_MEMIF_CLKSTCTRL                0x00000003    # HW_AUTO transition is enable
+WRITE         CM_C2C_CLKSTCTRL                  0x00000003    # HW_AUTO transition is enable
+
+# L3INIT Domain
+WRITE         PM_L3INIT_PWRSTCTRL               0x00000007
+
+WRITE         CM_L3INIT_CLKSTCTRL               0x00000002    # Start SW_WKUP Wakeu
+WRITE         CM_L3INIT_HSMMC1_CLKCTRL          0x01000002    # Module is explicitly enabled: And input clock is set to 96MHz clock from DPLL_PE
+WRITE         CM_L3INIT_HSMMC2_CLKCTRL          0x01000002    # Module is explicitly enabled: And input clock is set to 96MHz clock from DPLL_PER (default
+WRITE         CM_L3INIT_HSI_CLKCTRL             0x00000001    # Module is managed automatically by HW according to clock domai
+WRITE         CM_L3INIT_UNIPRO1_CLKCTRL         0x00000102    # UNIPRO TX PHY optional clock is enabled: And Module is explicitly enable
+WRITE         CM_L3INIT_HSUSBHOST_CLKCTRL       0x0000FF02    # Clock source is internal : All optional clocks enabled : Module explicitly enable
+WRITE         CM_L3INIT_HSUSBOTG_CLKCTRL        0x00000101    # 60MHz clock is sourced from on die UTMI PHY : Optional XCLK enabled : Module enable
+WRITE         CM_L3INIT_HSUSBTLL_CLKCTRL        0x00000701    # All optional clocks enabled : Module explicitly enable
+WRITE         CM_L3INIT_P1500_CLKCTRL           0x00000002
+WRITE         CM_L3INIT_FSUSB_CLKCTRL           0x00000002
+WRITE         CM_L3INIT_USBPHY_CLKCTRL          0x00000101    # 48 MHz optional clock enabled, 32KHz optclock disabled, modulemode h/w aut
+WRITE         CM_L3INIT_CLKSTCTRL               0x00000003    # Set it back to HW_AUTO Mod
+
+# PER SubSystem:
+# ==============
+# Configure & Lock the DPLL:
+WRITE         CM_CLKMODE_DPLL_PER               0x00000004    # [2:0] : set the DPLL to Bypass mod
+WRITE         CM_CLKSEL_DPLL_PER                0x00000A00
+WRITE         CM_DIV_M2_DPLL_PER                0x00000504
+WRITE         CM_DIV_M3_DPLL_PER                0x00000103
+WRITE         CM_DIV_M4_DPLL_PER                0x00000106
+WRITE         CM_DIV_M5_DPLL_PER                0x00000105
+WRITE         CM_DIV_M6_DPLL_PER                0x00000102
+WRITE         CM_DIV_M7_DPLL_PER                0x00000103
+WRITE         CM_AUTOIDLE_DPLL_PER              0x00000000
+WRITE         CM_CLKMODE_DPLL_PER               0x00000017    # [4:3] : Ramp mode set to 0b10; [2:0] : set the DPLL to Lock mod
+POLL_NZERO	  CM_IDLEST_DPLL_PER                0x00000001    # Wait for DPLL to Lock
+
+# Enable PRM:
+WRITE         PM_L4PER_PWRSTCTRL                0x00000007
+
+# Enable Clocks:
+WRITE         CM_L4PER_CLKSTCTRL                0x00000002
+# L4PER Domain
+WRITE         CM_L4PER_GPTIMER10_CLKCTRL        0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPTIMER11_CLKCTRL        0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPTIMER2_CLKCTRL         0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPTIMER3_CLKCTRL         0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPTIMER4_CLKCTRL         0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPTIMER9_CLKCTRL         0x00000002    # Input clock source is defalut(i.e. Sys_Clk). And explicit enable of module
+WRITE         CM_L4PER_GPIO2_CLKCTRL            0x00000101    # Optional Clk enabled : Module is managed automatically by H
+WRITE         CM_L4PER_GPIO3_CLKCTRL            0x00000101    # Optional Clk enabled : Module is managed automatically by H
+WRITE         CM_L4PER_GPIO4_CLKCTRL            0x00000101    # Optional Clk enabled : Module is managed automatically by H
+WRITE         CM_L4PER_GPIO5_CLKCTRL            0x00000101    # Optional Clk enabled : Module is managed automatically by H
+WRITE         CM_L4PER_GPIO6_CLKCTRL            0x00000101    # Optional Clk enabled : Module is managed automatically by H
+WRITE         CM_L4PER_HDQ1W_CLKCTRL            0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_I2C1_CLKCTRL             0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_I2C2_CLKCTRL             0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_I2C3_CLKCTRL             0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_I2C4_CLKCTRL             0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MCBSP4_CLKCTRL           0x00000002    # Module is in CORE_PD : 96MHz clock from DPLL_PER (default) : Intrnal clk src : Module enable
+WRITE         CM_L4PER_MCSPI1_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MCSPI2_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MCSPI3_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MCSPI4_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MMCSD3_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MMCSD4_CLKCTRL           0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_SLIMBUS2_CLKCTRL         0x00000702    # Optional clocks enabled : Module is explicitly enable
+WRITE         CM_L4PER_UART1_CLKCTRL            0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_UART2_CLKCTRL            0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_UART3_CLKCTRL            0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_UART4_CLKCTRL            0x00000002    # Module is explicitly enable
+WRITE         CM_L4PER_MMCSD5_CLKCTRL           0x00000002    # Module is explicitly enable
+
+POLL_VALUE    CM_L4PER_CLKSTCTRL                0x034FFF00    0x024FFF00
+
+# Enable All Functional and Interface Clocks for all the modules
+
+# DSS Module
+WRITE         PM_DSS_PWRSTCTRL                0x7
+
+WRITE         CM_DSS_CLKSTCTRL                0x2
+WRITE         CM_DSS_DSS_CLKCTRL                0xF02
+WRITE         CM_DSS_DEISS_CLKCTRL                0x2
+
+#	Check for DSS Clocks
+# POLL_VALUE    CM_DSS_CLKSTCTRL                  0x00000F00           0x00000F00  
+POLL_VALUE    CM_DSS_CLKSTCTRL                  0x00000F00           0x00000E00  # On Dallas Zebu DSS_ICLK bit status is not updated
+WRITE         CM_DSS_CLKSTCTRL                  0x00000003
+
+
+
+
+

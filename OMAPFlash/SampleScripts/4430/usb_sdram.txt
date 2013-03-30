@@ -1,0 +1,10 @@
+# OMAP4
+-omap 4
+# Timeout and other config
+-t 600 -p SEVM_MDDR_ELPIDA_4G -2 
+
+# RAM Download 
+chip_download SDRAM <binary file name>
+
+# Execute image from RAM
+command branch SDRAM 0
